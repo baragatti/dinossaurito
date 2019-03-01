@@ -12,6 +12,7 @@ span {
 
 body {
     background: url("../assets/background.jpg") no-repeat fixed center;
+    background-size: cover;
 }
 
 .main {
