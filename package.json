@@ -1,0 +1,38 @@
+{
+  "name": "dinossaurito",
+  "version": "1.0.0",
+  "description": "Dinossaurito",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baragatti/dinossaurito.git"
+  },
+  "author": "Lucas Baragatti",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/baragatti/dinossaurito/issues"
+  },
+  "homepage": "https://github.com/baragatti/dinossaurito#readme",
+  "private": true,
+  "scripts": {
+    "start": "run-s watch",
+    "build": "run-s build:*",
+    "serve": "browser-sync start -s \"dist\" -f \"dist\"",
+    "build:assets": "copyfiles -u 1 \"src/**/*.js\" \"src/**/*.css\" \"src/**/*.html\" \"src/**/*.{png,jpg,gif}\" dist",
+    "build:tsc": "webpack --config webpack.config.js",
+    "watch:tsc": "webpack --watch --config webpack.config.js",
+    "watch:assets": "run-s build:assets",
+    "watch:onchange": "onchange \"src/**/*.js\" \"src/**/*.css\" \"src/**/*.html\" \"src/**/*.{png,jpg,gif}\" -- run-s build:assets",
+    "watch": "run-p serve watch:*"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.3",
+    "copyfiles": "^2.1.0",
+    "npm-run-all": "^4.1.5",
+    "onchange": "^5.2.0",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
+  },
+  "dependencies": {}
+}
