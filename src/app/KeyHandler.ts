@@ -6,8 +6,8 @@ export default class KeyHandler {
     constructor() {
         this.pressedKeys = {};
 
-        document.addEventListener('keyup', this.onKeyUp, false);
-        document.addEventListener('keydown', this.onKeyDown, false);
+        document.addEventListener('keyup', (e) => this.onKeyUp(e), false);
+        document.addEventListener('keydown', (e) => this.onKeyDown(e), false);
     }
 
     private onKeyDown(e) {

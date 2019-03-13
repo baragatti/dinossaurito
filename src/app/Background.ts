@@ -5,9 +5,11 @@ import Helper from "./Helper";
 export default class Background implements Drawable {
     private options: DrawableOptions;
     private bits: any;
+    private size: number;
 
     constructor(options: DrawableOptions) {
         this.options = options;
+        this.size = 20;
 
         this.generateBits();
     }
@@ -30,14 +32,20 @@ export default class Background implements Drawable {
     }
 
     draw(context: any, offset: number) {
-        const {bits} = this;
+        const {
+            bits,
+            size,
+        } = this;
         const {
             height,
             width,
         } = this.options;
 
-        context.fillStyle = "#444";
-        context.fillRect(0, height - 20, width, 1);
+        context.fillStyle = "#F2D16B";
+        context.fillRect(0, height - size, width, size);
+
+        context.fillStyle = "#856501";
+        context.fillRect(0, height - size, width, 1);
 
         for (let i = bits.length - 1; i >= 0; i--) {
             context.fillRect(width - ((bits[i].x + offset) % width), bits[i].y, bits[i].width, 1);

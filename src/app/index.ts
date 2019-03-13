@@ -1,7 +1,5 @@
-// import Game from "./Game";
+import Game from "./Game";
 
-// const game = new Game();
-
-alert(`doix gudan  xzzzz`);
-
-// npm run check-types -- --watch
+document.addEventListener("DOMContentLoaded", function (event) {
+    const game = new Game();
+});

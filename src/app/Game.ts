@@ -35,6 +35,7 @@ export default class Game {
         this.canvas = document.getElementById("game");
         this.context = this.canvas.getContext("2d");
 
+        this.obstacles = [];
         this.nextObstacle = 0;
         this.offset = 0;
         this.lastTick = null;
@@ -51,8 +52,10 @@ export default class Game {
     initObjects() {
         this.player = new Player({
             context: this.context,
+            width: this.canvas.width,
+            height: this.canvas.height,
             left: 10,
-            bottom: this.canvas.height - Global.GROUND_BUFFER,
+            bottom: Global.GROUND_BUFFER,
         });
 
         this.background = new Background({
