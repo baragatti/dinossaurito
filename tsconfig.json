@@ -8,7 +8,11 @@
     // Local config
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "lib": [
+      "es2015",
+      "dom"
+    ]
   },
   "include": [
     "src/**/*"
