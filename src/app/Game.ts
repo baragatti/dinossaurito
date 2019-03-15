@@ -4,24 +4,16 @@ import ScoreBoard from "./ScoreBoard";
 import Obstacle from "./Obstacle";
 import KeyHandler from "./KeyHandler";
 import Helper from "./Helper";
-
-const Global = {
-    DEFAULT_COLOUR: "#444",
-    BACKGROUND_COLOUR: "#EEE",
-    OFFSET_SPEED: 0.4,
-    MAX_TIME_TICK: 1000 / 60,
-    SCREEN_BUFFER: 50,
-    GROUND_BUFFER: 10,
-    SPACE_BAR_CODE: 32,
-    MIN_CACTUS_DISTANCE: 400,
-};
+import Config from "./Config";
+import DrawableOptions from "./interfaces/DrawableOptions";
 
 export default class Game {
     private readonly canvas: HTMLCanvasElement;
     private readonly context: CanvasRenderingContext2D;
     private nextObstacle: number;
     private offset: number;
-    private lastTick: any;
+    private lastTick: number;
+    private minTickObstable: number = 0;
     private running: boolean;
     private finished: boolean;
     private player: Player;
@@ -31,8 +23,7 @@ export default class Game {
     private keyHandler: KeyHandler;
 
     constructor() {
-        // @ts-ignore
-        this.canvas = document.getElementById("game");
+        this.canvas = <HTMLCanvasElement>document.getElementById("game");
         this.context = this.canvas.getContext("2d");
 
         this.obstacles = [];
@@ -49,59 +40,55 @@ export default class Game {
         requestAnimationFrame(this.step.bind(this));
     }
 
-    initObjects() {
-        this.player = new Player({
+    private getDefaultDrawableOptions(): DrawableOptions {
+        return {
             context: this.context,
+            getOffset: () => this.offset,
             width: this.canvas.width,
             height: this.canvas.height,
+        }
+    }
+
+    private initObjects() {
+        this.player = new Player({
+            ...this.getDefaultDrawableOptions(),
             left: 10,
-            bottom: Global.GROUND_BUFFER,
+            bottom: Config.Game.GROUND_BUFFER,
         });
 
         this.background = new Background({
-            context: this.context,
-            width: this.canvas.width,
-            height: this.canvas.height,
+            ...this.getDefaultDrawableOptions(),
         });
 
         this.score = new ScoreBoard({
-            context: this.context,
+            ...this.getDefaultDrawableOptions(),
             left: this.canvas.width - 10,
-            bottom: 26,
+            top: 5,
         });
     };
 
     updateObstacles() {
-        // TODO
-        while (this.offset > this.nextObstacle) {
-            let count = Math.floor(Helper.rand(1, 3.9)),
-                scale = Helper.rand(0.8, 1.5),
-                x = this.canvas.width + this.offset + Global.SCREEN_BUFFER;
-
-            while (count--) {
-                // TODO
-                // this.obstacles.push(new Obstacle({
-                //     left: x + (count * 20 * scale),
-                //     bottom: this.canvas.height - Global.GROUND_BUFFER,
-                //     scale: scale,
-                //     leftSize: Helper.rand(0.5, 1.5),
-                //     rightSize: Helper.rand(0.5, 1.5),
-                //     centerSize: Helper.rand(0.5, 1.5),
-                // }));
+        if ((this.offset > this.nextObstacle) && (this.lastTick > this.minTickObstable)) {
+            if (Helper.rand(1, 100) > 30) {
+                this.minTickObstable = this.lastTick + Helper.rand(500, Helper.rand(1500, 2500));
             }
 
-            this.nextObstacle = this.offset + Helper.rand(Global.MIN_CACTUS_DISTANCE, this.canvas.width);
+            this.obstacles.push(new Obstacle({
+                ...this.getDefaultDrawableOptions(),
+                left: 20 * Helper.rand(0.8, 4),
+                bottom: Config.Game.GROUND_BUFFER,
+            }));
+
+            this.nextObstacle = this.offset + Helper.rand(Config.Game.MIN_OBSTACLE_DISTANCE, this.canvas.width);
         }
     }
 
     removeOldObstacles() {
-        // TODO
-        let count = 0; // used to force cacti off the screen
+        let count = 0;
 
-        // TODO implementar x nos obstaculos
-        // while (this.obstacles.length > count && this.obstacles[count].x < this.offset - Global.SCREEN_BUFFER) {
-        //     count++;
-        // }
+        while (this.obstacles.length > count && this.obstacles[count].getGameObject().x < -Config.Game.SCREEN_BUFFER) {
+            count++;
+        }
 
         if (count > 0)
             this.obstacles.splice(0, count);
@@ -110,18 +97,18 @@ export default class Game {
     draw() {
         this.clear();
 
-        this.background.draw(this.context, this.offset);
+        this.background.draw();
 
         for (let i = 0; i < this.obstacles.length; i++) {
             // TODO colliders
-            //this.obstacles[i].drawColliders(this.context, this.offset);
-            this.obstacles[i].draw(this.context, this.offset);
+            //this.obstacles[i].drawColliders();
+            this.obstacles[i].draw();
         }
 
-        // TODO colliders
-        //this.player.drawColliders(this.context, this.offset);
-        this.player.draw(this.context, this.offset);
-        this.score.draw(this.context, this.offset);
+        // TODO colliders - migrar p/ getColliders
+        //this.player.drawColliders();
+        this.player.draw();
+        this.score.draw();
     }
 
     clear() {
@@ -142,19 +129,19 @@ export default class Game {
 
     step(timestamp) {
         if (this.running && this.lastTick) {
-            this.offset += Math.min((timestamp - this.lastTick), Global.MAX_TIME_TICK) * Global.OFFSET_SPEED;
+            this.offset += Math.min((timestamp - this.lastTick), Config.Game.MAX_TIME_TICK) * Config.Game.OFFSET_SPEED;
 
             this.removeOldObstacles();
             this.updateObstacles();
 
             // TODO implementar pulo
-            // if (!this.player.isJumping(this.offset) && this.keyHandler.isKeyPressed(Global.SPACE_BAR_CODE) {
-            //     this.player.startJump(this.offset);
-            // }
+            if (!this.player.isJumping() && this.keyHandler.isKeyPressed(Config.Game.JUMP_KEY)) {
+                this.player.startJump();
+            }
 
             this.checkCollision();
             this.draw();
-        } else if (this.keyHandler.isKeyPressed(Global.SPACE_BAR_CODE)) {
+        } else if (this.keyHandler.isKeyPressed(Config.Game.JUMP_KEY)) {
             this.running = true;
         }
 

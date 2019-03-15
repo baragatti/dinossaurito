@@ -31,12 +31,14 @@ export default class Background implements Drawable {
         this.bits = bits;
     }
 
-    draw(context: any, offset: number) {
+    draw() {
         const {
             bits,
             size,
         } = this;
         const {
+            context,
+            getOffset,
             height,
             width,
         } = this.options;
@@ -48,7 +50,7 @@ export default class Background implements Drawable {
         context.fillRect(0, height - size, width, 1);
 
         for (let i = bits.length - 1; i >= 0; i--) {
-            context.fillRect(width - ((bits[i].x + offset) % width), bits[i].y, bits[i].width, 1);
+            context.fillRect(width - ((bits[i].x + getOffset()) % width), bits[i].y, bits[i].width, 1);
         }
     }
 }
