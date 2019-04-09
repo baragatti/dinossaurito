@@ -2,24 +2,38 @@ import DrawableOptions from "./interfaces/DrawableOptions";
 import Drawable from "./interfaces/Drawable";
 import Config from "./Config";
 import GameObject from "./interfaces/GameObject";
+import Animation from "./Animation";
+import Sprite from "./Sprite";
 
 export default class Player implements Drawable {
     private options: DrawableOptions;
-    private initialGameObject: GameObject
+    private initialGameObject: GameObject;
     private gameObject: GameObject;
     private jumpStart: number;
+    private static animations: Object = {
+        run: new Animation('player', 'run', 6, 'png', 100),
+        jump: new Sprite(Config.Assets.HREF + 'player/jump_1.png'),
+    };
 
     constructor(options: DrawableOptions) {
         this.options = options;
         this.initialGameObject = {
-            width: 20,
-            height: 50,
+            width: 67,
+            height: 56,
             x: options.left,
-            y: options.height - options.bottom - 50,
+            y: options.height - options.bottom - 56,
         };
         this.gameObject = {...this.initialGameObject};
 
         this.jumpStart = null;
+    }
+
+    static async preload() {
+        const keys = Object.keys(Player.animations);
+
+        for (let i=0; i < keys.length; i++) {
+            await Player.animations[keys[i]].preload();
+        }
     }
 
     isJumping() {
@@ -69,7 +83,10 @@ export default class Player implements Drawable {
             width,
         } = this.gameObject;
 
-        context.fillStyle = "#000000";
-        context.fillRect(x, y, width, height);
+        if (this.isJumping()) {
+            context.drawImage(Player.animations['jump'].getImage(), x, y, width, height);
+        } else {
+            context.drawImage(Player.animations['run'].getImage(), x, y, width, height);
+        }
     }
 }

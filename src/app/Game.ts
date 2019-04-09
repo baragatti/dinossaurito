@@ -35,9 +35,10 @@ export default class Game {
 
         this.keyHandler = new KeyHandler();
 
-        this.initObjects();
-        this.draw();
-        requestAnimationFrame(this.step.bind(this));
+        this.initObjects().then(() => {
+            this.draw();
+            requestAnimationFrame(this.step.bind(this));
+        });
     }
 
     private getDefaultDrawableOptions(): DrawableOptions {
@@ -49,7 +50,12 @@ export default class Game {
         }
     }
 
-    private initObjects() {
+    private async initObjects() {
+        await Player.preload();
+        await Obstacle.preload();
+
+        this.context.imageSmoothingEnabled = false;
+
         this.player = new Player({
             ...this.getDefaultDrawableOptions(),
             left: 10,

@@ -17,7 +17,10 @@ const Config = {
     },
     Score: {
         FACTOR: 0.1,
-    }
+    },
+    Assets: {
+        HREF: 'assets/',
+    },
 };
 
 export default Config;
