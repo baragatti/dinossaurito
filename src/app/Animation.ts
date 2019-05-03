@@ -1,27 +1,51 @@
 import Sprite from "./Sprite";
 import Config from "./Config";
 
+export interface AnimationOptions {
+    context: CanvasRenderingContext2D,
+    prefix: string,
+    name: string,
+    length: number,
+    extension: string,
+    delay: number,
+}
+
 export default class Animation {
-    private sprites: Array<Sprite> = [];
+    protected context: CanvasRenderingContext2D;
+    protected sprites: Array<Sprite> = [];
     private delay: number;
     private lastTick: number;
-    private currentImage: number;
+    protected currentImage: number;
 
-    constructor(prefix: string, name: string, length: number, extension: string, delay: number) {
+    constructor(options: AnimationOptions) {
+        const {
+            prefix,
+            name,
+            length,
+            extension,
+            delay,
+            context,
+        } = options;
+
         const pathPrefix = Config.Assets.HREF + (prefix ? `${prefix}/` : '') + name + '_';
 
-        for(let i = 0; i < length; i++) {
-            const link = pathPrefix + (i+1) + '.' + extension;
+        for (let i = 0; i < length; i++) {
+            const link = pathPrefix + (i + 1) + '.' + extension;
 
-            this.sprites.push(new Sprite(link));
+            this.sprites.push(this.createSprite(context, link));
         }
 
+        this.context = context;
         this.lastTick = new Date().getTime();
         this.currentImage = 0;
         this.delay = delay;
     }
 
-    async preload() {
+    protected createSprite(context: CanvasRenderingContext2D, link: string) {
+        return new Sprite(link);
+    }
+
+    async preload(): Promise<any> {
         return Promise.all(this.sprites.map(sprite => sprite.preload()));
     }
 
@@ -29,10 +53,9 @@ export default class Animation {
         const newTime = new Date().getTime();
 
         if ((newTime - this.lastTick) > this.delay) {
-            console.log('new tick', this.currentImage);
             this.currentImage++;
 
-            if (this.currentImage > (this.sprites.length -1)) this.currentImage = 0;
+            if (this.currentImage > (this.sprites.length - 1)) this.currentImage = 0;
 
             this.lastTick = newTime;
         }

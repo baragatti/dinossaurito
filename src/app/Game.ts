@@ -6,6 +6,8 @@ import KeyHandler from "./KeyHandler";
 import Helper from "./Helper";
 import Config from "./Config";
 import DrawableOptions from "./interfaces/DrawableOptions";
+import FrameCounter from "./FrameCounter";
+import Collision from "./Collision";
 
 export default class Game {
     private readonly canvas: HTMLCanvasElement;
@@ -13,31 +15,37 @@ export default class Game {
     private nextObstacle: number;
     private offset: number;
     private lastTick: number;
-    private minTickObstable: number = 0;
+    private minTickObstable: number;
     private running: boolean;
     private finished: boolean;
     private player: Player;
     private background: Background;
     private score: ScoreBoard;
     private obstacles: Obstacle[];
+    private frameCounter: FrameCounter;
     private keyHandler: KeyHandler;
+    private preloaded: boolean = false;
+    private requestedFrame: boolean = false;
 
     constructor() {
         this.canvas = <HTMLCanvasElement>document.getElementById("game");
         this.context = this.canvas.getContext("2d");
 
-        this.obstacles = [];
-        this.nextObstacle = 0;
-        this.offset = 0;
-        this.lastTick = null;
-        this.running = false;
-        this.finished = false;
-
         this.keyHandler = new KeyHandler();
+
+        this.startGame();
+    }
+
+    startGame() {
+        this.reset();
 
         this.initObjects().then(() => {
             this.draw();
-            requestAnimationFrame(this.step.bind(this));
+
+            if (!this.requestedFrame) {
+                requestAnimationFrame(this.step.bind(this));
+                this.requestedFrame = true;
+            }
         });
     }
 
@@ -51,8 +59,12 @@ export default class Game {
     }
 
     private async initObjects() {
-        await Player.preload();
-        await Obstacle.preload();
+        if (!this.preloaded) {
+            await Player.preload(this.context);
+            await Obstacle.preload(this.context);
+
+            this.preloaded = true;
+        }
 
         this.context.imageSmoothingEnabled = false;
 
@@ -69,6 +81,11 @@ export default class Game {
         this.score = new ScoreBoard({
             ...this.getDefaultDrawableOptions(),
             left: this.canvas.width - 10,
+            top: 5,
+        });
+
+        this.frameCounter = new FrameCounter({
+            ...this.getDefaultDrawableOptions(),
             top: 5,
         });
     };
@@ -106,15 +123,16 @@ export default class Game {
         this.background.draw();
 
         for (let i = 0; i < this.obstacles.length; i++) {
-            // TODO colliders
-            //this.obstacles[i].drawColliders();
-            this.obstacles[i].draw();
+            const obstacle: Obstacle = this.obstacles[i];
+
+            obstacle.draw();
+            if (Config.Debug.SHOW_COLLIDERS) obstacle.drawColliders();
         }
 
-        // TODO colliders - migrar p/ getColliders
-        //this.player.drawColliders();
         this.player.draw();
+        if (Config.Debug.SHOW_COLLIDERS) this.player.drawColliders();
         this.score.draw();
+        this.frameCounter.draw();
     }
 
     clear() {
@@ -122,38 +140,53 @@ export default class Game {
     }
 
     checkCollision() {
-        for (let i = 0; i < this.obstacles.length; i++) {
-            // TODO implementar teste de colisao no player
-            // if (this.player.collidesWith(this.obstacles[i], this.offset)) {
-            //     this.running = false;
-            //     this.finished = true;
-            //     this.player.wideEyed = true; // TODO implementar no player
-            //     return;
-            // }
+        const size = this.obstacles.length > 2 ? 2 : this.obstacles.length;
+
+        for (let i = 0; i < size; i++) {
+            const obstacle: Obstacle = this.obstacles[i];
+
+            if (Collision.test(this.player.getPixelMap(), this.player.getGameObject(),
+                obstacle.getPixelMap(), obstacle.getGameObject())) {
+
+                this.running = false;
+                this.finished = true;
+                return;
+            }
         }
+    }
+
+    reset() {
+        console.log('resetando');
+
+        this.obstacles = [];
+        this.nextObstacle = 0;
+        this.minTickObstable = 0;
+        this.offset = 0;
+        this.lastTick = null;
+        this.running = false;
+        this.finished = false;
     }
 
     step(timestamp) {
         if (this.running && this.lastTick) {
+            this.frameCounter.refresh();
             this.offset += Math.min((timestamp - this.lastTick), Config.Game.MAX_TIME_TICK) * Config.Game.OFFSET_SPEED;
 
             this.removeOldObstacles();
             this.updateObstacles();
 
-            // TODO implementar pulo
             if (!this.player.isJumping() && this.keyHandler.isKeyPressed(Config.Game.JUMP_KEY)) {
                 this.player.startJump();
             }
 
-            this.checkCollision();
             this.draw();
+            this.checkCollision();
         } else if (this.keyHandler.isKeyPressed(Config.Game.JUMP_KEY)) {
-            this.running = true;
+            if (this.finished) this.startGame();
+            else if (!this.running) this.running = true;
         }
 
-        if (!this.finished) {
-            this.lastTick = timestamp;
-            requestAnimationFrame(this.step.bind(this));
-        }
+        this.lastTick = timestamp;
+        requestAnimationFrame(this.step.bind(this));
     };
 }

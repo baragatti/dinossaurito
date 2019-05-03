@@ -6,7 +6,7 @@ export default class Sprite {
         this.link = link;
     }
 
-    async preload() {
+    async preload(): Promise<any> {
         const {
             image,
             link,
