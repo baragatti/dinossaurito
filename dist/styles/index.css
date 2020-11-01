@@ -1,0 +1,47 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+span {
+    font-family: Impact, Haettenschweiler, Franklin Gothic Bold, Charcoal, Helvetica Inserat, Bitstream Vera Sans Bold, Arial Black, sans serif;
+}
+
+body {
+    background: url("../assets/background.jpg") no-repeat fixed center;
+    background-size: cover;
+}
+
+.main {
+    padding-top: 100px;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    margin: 0 auto 0 auto;
+    width: 800px;
+    height: 100px;
+    justify-content: center;
+}
+
+.header > span {
+    font-size: 45px;
+    color: #006400;
+    text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+}
+
+#game {
+    display: flex;
+    margin: 0 auto 0 auto;
+    width: 800px;
+    height: 250px;
+    background: #d1d1d1;
+    overflow: hidden;
+    -webkit-box-shadow: 0 3px 38px 0 rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0 3px 38px 0 rgba(0, 0, 0, 0.75);
+    box-shadow: 0 3px 38px 0 rgba(0, 0, 0, 0.75);
+}

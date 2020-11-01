@@ -1,42 +1,42 @@
 export default class PixelMap {
-    private context: CanvasRenderingContext2D;
-    private image: HTMLImageElement;
-    private resolution: number;
-    private pixelMap: Array<any>;
+	private readonly context: CanvasRenderingContext2D;
+	private readonly image: HTMLImageElement;
+	private readonly resolution: number;
+	private pixelMap: Array<any>;
 
-    constructor(context: CanvasRenderingContext2D, image: HTMLImageElement, resolution: number = 3) {
-        this.context = context;
-        this.image = image;
-        this.resolution = resolution;
+	constructor(context: CanvasRenderingContext2D, image: HTMLImageElement, resolution: number = 3) {
+		this.context = context;
+		this.image = image;
+		this.resolution = resolution;
 
-        this.generate();
-    }
+		this.generate();
+	}
 
-    private generate() {
-        const pixelMap = [];
+	private generate() {
+		const pixelMap = [];
 
-        this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height);
+		this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height);
 
-        for (let y = 0; y < this.image.width; y = y + this.resolution) {
-            for (let x = 0; x < this.image.height; x = x + this.resolution) {
-                const pixel = this.context.getImageData(x, y, this.resolution, this.resolution);
+		for (let y = 0; y < this.image.width; y = y + this.resolution) {
+			for (let x = 0; x < this.image.height; x = x + this.resolution) {
+				const pixel = this.context.getImageData(x, y, this.resolution, this.resolution);
 
-                if (pixel.data[3] != 0) {
-                    pixelMap.push({x: x, y: y});
-                }
-            }
-        }
+				if (pixel.data[3] != 0) {
+					pixelMap.push({x: x, y: y});
+				}
+			}
+		}
 
-        this.context.clearRect(0, 0, this.image.width, this.image.height);
+		this.context.clearRect(0, 0, this.image.width, this.image.height);
 
-        this.pixelMap = pixelMap;
-    }
+		this.pixelMap = pixelMap;
+	}
 
-    public getPixelMap(): Array<any> {
-        return this.pixelMap;
-    }
+	public getPixelMap(): Array<any> {
+		return this.pixelMap;
+	}
 
-    public getResolution(): number {
-        return this.resolution;
-    }
+	public getResolution(): number {
+		return this.resolution;
+	}
 }
